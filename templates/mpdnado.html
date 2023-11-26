@@ -1,0 +1,22 @@
+<html>
+
+<head>
+<script>
+function buttonHandler(id) {
+  console.log("button click:", id);
+  var xmlreq = new XMLHttpRequest();
+  xmlreq.open("GET", "http://" + location.host + "/" + id)
+  xmlreq.send();
+}
+</script>
+</head>
+
+<body>
+  <h1>PI RADIO</h1>
+  <button id="btn_stop" onclick="buttonHandler(this.id)">STOP</button>
+  <button id="btn_play" onclick="buttonHandler(this.id)">PLAY</button>
+  <button id="btn_volup" onclick="buttonHandler(this.id)">VOL+</button>
+  <button id="btn_voldn" onclick="buttonHandler(this.id)">VOL-</button>
+</body>
+
+</html>
