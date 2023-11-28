@@ -5,6 +5,12 @@ import tornado.web
 
 PORT = 8080
 PLAYLIST = "boxy"
+TRACK = 0
+DEBUG = False
+
+def DBG(*args, **kwargs):
+    if DEBUG:
+        print(*args, **kwargs)
 
 #--------------------------------------------------------------------
 # M P D
@@ -19,17 +25,6 @@ def mpd_init():
     mpc.load(PLAYLIST)
     mpc.close()
     mpc.disconnect()
-
-def mpd_status():
-    """Return status dictionary or None."""
-    try:
-        mpc.connect("localhost", 6600)
-        status = mpc.status()
-        mpc.close()
-        mpc.disconnect()
-        return status
-    except:
-        return None
 
 def mpd_stop():
     """Stop playback."""
@@ -54,18 +49,6 @@ def mpd_play(track=None):
     except:
         pass
 
-def mpd_toggle():
-    """Toggle play back. Play if stopped, stop if playing."""
-    try:
-        s = mpd_status()
-        if s is not None:
-            if s['state'] == 'play':
-                mpd_stop()
-            else:
-                mpd_play()
-    except:
-        pass
-
 def mpd_change_vol(amount):
     """Change volume by amount in percent."""
     try:
@@ -83,41 +66,32 @@ class RootHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("mpdnado.html")
 
-class BtnStopHandler(tornado.web.RequestHandler):
+class ButtonHandler(tornado.web.RequestHandler):
     def get(self):
-        print("STOP!")
-        mpd_stop()
-
-class BtnPlayHandler(tornado.web.RequestHandler):
-    def get(self):
-        print("PLAY!")
-        mpd_play()
-
-class BtnVolUpHandler(tornado.web.RequestHandler):
-    def get(self):
-        print("VOL+!")
-        mpd_change_vol(10)
-
-class BtnVolDnHandler(tornado.web.RequestHandler):
-    def get(self):
-        print("VOL-!")
-        mpd_change_vol(-10)
-
-class BtnVolDnHandler(tornado.web.RequestHandler):
-    def get(self):
-        print("VOL-!")
-        mpd_change_vol(-10)
+        btn_uri = self.request.uri
+        DBG("BUTTON HANDLER: ", btn_uri)
+        if "btn_b1" in btn_uri:
+            DBG("button1")
+            mpd_stop()
+        if "btn_b2" in btn_uri:
+            DBG("button2")
+            mpd_play(TRACK)
+        if "btn_b3" in btn_uri:
+            DBG("button3")
+            mpd_change_vol(10)
+        if "btn_b4" in btn_uri:
+            DBG("button4")
+            mpd_change_vol(-10)
 
 class MainServerApp(tornado.web.Application):
     """Main Server application."""
-
     def __init__(self):
         handlers = [
             (r"/", RootHandler),
-            (r"/btn_stop", BtnStopHandler),
-            (r"/btn_play", BtnPlayHandler),
-            (r"/btn_volup", BtnVolUpHandler),
-            (r"/btn_voldn", BtnVolDnHandler),
+            (r"/btn_b1", ButtonHandler),
+            (r"/btn_b2", ButtonHandler),
+            (r"/btn_b3", ButtonHandler),
+            (r"/btn_b4", ButtonHandler),
         ]
 
         settings = {
@@ -131,6 +105,7 @@ class MainServerApp(tornado.web.Application):
 # M A I N
 #--------------------------------------------------------------------
 if __name__ == '__main__':
+    mpd_init()
     tornado.httpserver.HTTPServer(MainServerApp()).listen(PORT)
-    print("Server stating on", PORT)
+    print("Server starting on", PORT)
     tornado.ioloop.IOLoop.instance().start()

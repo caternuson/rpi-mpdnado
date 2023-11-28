@@ -1,6 +1,34 @@
 <html>
 
 <head>
+<style>
+button {
+  width: 100%;
+  height: 25%;
+  border: 0.2em solid;
+  padding: 0.5em;
+  border-radius: 0.3em;
+  font-family: sans-serif;
+  font-size: 5em;
+  font-weight: bold;
+  font-style: oblique;
+}
+button:active {
+  scale: 95%;
+}
+button.b1 {
+  background-color: #FF0000;
+}
+button.b2 {
+  background-color: #FF8800;
+}
+button.b3 {
+  background-color: #FFFF00;
+}
+button.b4 {
+  background-color: #FFFFFF;
+}
+</style>
 <script>
 function buttonHandler(id) {
   console.log("button click:", id);
@@ -12,11 +40,10 @@ function buttonHandler(id) {
 </head>
 
 <body>
-  <h1>PI RADIO</h1>
-  <button id="btn_stop" onclick="buttonHandler(this.id)">STOP</button>
-  <button id="btn_play" onclick="buttonHandler(this.id)">PLAY</button>
-  <button id="btn_volup" onclick="buttonHandler(this.id)">VOL+</button>
-  <button id="btn_voldn" onclick="buttonHandler(this.id)">VOL-</button>
+  <button class="b1" id="btn_b1" onclick="buttonHandler(this.id)">STOP</button>
+  <button class="b2" id="btn_b2" onclick="buttonHandler(this.id)">PLAY</button>
+  <button class="b3" id="btn_b3" onclick="buttonHandler(this.id)">VOL+</button>
+  <button class="b4" id="btn_b4" onclick="buttonHandler(this.id)">VOL-</button>
 </body>
 
 </html>
