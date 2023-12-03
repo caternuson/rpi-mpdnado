@@ -1,0 +1,36 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  border-style: solid;
+  border-color: #ff0000;
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+}
+#controls {
+  border-style: solid;
+  background-color: #ccaaaa;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+#play {
+  flex: 1;
+  height: 100%;
+}
+#volume {
+  flex: 4;
+  height: 100;
+}
+#currentsong {
+  border-style: solid;
+  background-color: #aaccaa;
+  flex: 1;
+}
+#playlist {
+  border-style: solid;
+  background-color: #aaaacc;
+  flex: 5;
+}

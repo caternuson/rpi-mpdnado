@@ -3,10 +3,9 @@ import mpd
 import tornado.httpserver
 import tornado.web
 
-PORT = 8080
-PLAYLIST = "boxy"
-TRACK = 0
-DEBUG = False
+WEB_PORT = 8081
+MPD_PORT = 6600
+DEBUG = True
 
 def DBG(*args, **kwargs):
     if DEBUG:
@@ -17,19 +16,20 @@ def DBG(*args, **kwargs):
 #--------------------------------------------------------------------
 mpc = mpd.MPDClient()
 
-def mpd_init():
-    """Initialize MPD."""
-    mpc.connect("localhost", 6600)
-    mpc.stop()
-    mpc.clear()
-    mpc.load(PLAYLIST)
-    mpc.close()
-    mpc.disconnect()
+def mpd_status():
+    try:
+        mpc.connect("localhost", MPD_PORT)
+        status = mpc.status()
+        mpc.close()
+        mpc.disconnect()
+        return status
+    except:
+        pass
 
 def mpd_stop():
     """Stop playback."""
     try:
-        mpc.connect("localhost", 6600)
+        mpc.connect("localhost", MPD_PORT)
         mpc.stop()
         mpc.close()
         mpc.disconnect()
@@ -39,7 +39,7 @@ def mpd_stop():
 def mpd_play(track=None):
     """Play specified track index."""
     try:
-        mpc.connect("localhost", 6600)
+        mpc.connect("localhost", MPD_PORT)
         if track is not None:
             mpc.play(track)
         else:
@@ -49,13 +49,32 @@ def mpd_play(track=None):
     except:
         pass
 
-def mpd_change_vol(amount):
+def mpd_toggle():
+    try:
+        if mpd_status()['state']=='play':
+            mpd_stop()
+        else:
+            mpd_play()
+    except:
+        pass
+
+def mpd_set_vol(level):
     """Change volume by amount in percent."""
     try:
-        mpc.connect("localhost", 6600)
-        mpc.volume(amount)
+        mpc.connect("localhost", MPD_PORT)
+        mpc.setvol(level)
         mpc.close()
         mpc.disconnect()
+    except:
+        pass
+
+def mpd_get_current_song(item):
+    try:
+        mpc.connect("localhost", MPD_PORT)
+        info =  mpc.currentsong()
+        mpc.close()
+        mpc.disconnect()
+        return info.get(item, "unknown")
     except:
         pass
 
@@ -66,32 +85,33 @@ class RootHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("mpdnado.html")
 
-class ButtonHandler(tornado.web.RequestHandler):
-    def get(self):
-        btn_uri = self.request.uri
-        DBG("BUTTON HANDLER: ", btn_uri)
-        if "btn_b1" in btn_uri:
-            DBG("button1")
-            mpd_stop()
-        if "btn_b2" in btn_uri:
-            DBG("button2")
-            mpd_play(TRACK)
-        if "btn_b3" in btn_uri:
-            DBG("button3")
-            mpd_change_vol(10)
-        if "btn_b4" in btn_uri:
-            DBG("button4")
-            mpd_change_vol(-10)
+class XHRHandler(tornado.web.RequestHandler):
+    def get(self, *args, **kwargs):
+        DBG("XHR: ", end='')
+        try:
+            params = self.request.arguments
+            for command, value in params.items():
+                command = command.strip().upper()
+                DBG(" command={}, value={}".format(command, value))
+                if command=="PLAY":
+                    DBG("PLAY")
+                    mpd_toggle()
+                if command=="VOLUME":
+                    level = int(value[0])
+                    DBG("VOLUME {}".format(level))
+                    mpd_set_vol(level)
+                if command=="SONG":
+                    DBG("SONG")
+                    self.write(mpd_get_current_song('title'))
+        except:
+            DBG("NO ARG")
 
 class MainServerApp(tornado.web.Application):
     """Main Server application."""
     def __init__(self):
         handlers = [
             (r"/", RootHandler),
-            (r"/btn_b1", ButtonHandler),
-            (r"/btn_b2", ButtonHandler),
-            (r"/btn_b3", ButtonHandler),
-            (r"/btn_b4", ButtonHandler),
+            (r"/xhr", XHRHandler)
         ]
 
         settings = {
@@ -105,7 +125,6 @@ class MainServerApp(tornado.web.Application):
 # M A I N
 #--------------------------------------------------------------------
 if __name__ == '__main__':
-    mpd_init()
-    tornado.httpserver.HTTPServer(MainServerApp()).listen(PORT)
-    print("Server starting on", PORT)
+    tornado.httpserver.HTTPServer(MainServerApp()).listen(WEB_PORT)
+    print("Server starting on", WEB_PORT)
     tornado.ioloop.IOLoop.instance().start()
