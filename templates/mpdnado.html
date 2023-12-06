@@ -2,18 +2,23 @@
 <html>
 
 <head>
-<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0"/>
 <link href={{ static_url("mpdnado.css") }} rel="stylesheet"/>
 <script src={{ static_url("mpdnado.js") }}></script>
 </head>
 
 <body>
-<div id="controls">
-  <button id="play">&#x25b6;</button>
-  <input id="volume" type="range" min="0" max="100">
+<div id="base">
+  <div id="controls">
+    <button id="play">&#x25b6;</button>
+    <input id="volume" type="range" min="0" max="100">
+  </div>
+  <div id="currentsong">
+    <p class="song_info" id="song_name">SONG NAME</p>
+    <p class="song_info" id="song_title">SONG TITLE</p>
+  </div>
+  <div id="playlist">PLAYLIST</div>
 </div>
-<div id="currentsong">CURRENT SONG</div>
-<div id="playlist">PLAYLIST</div>
 </body>
 
 </html>

@@ -2,35 +2,50 @@ html, body {
   margin: 0;
   padding: 0;
 }
-body {
-  border-style: solid;
-  border-color: #ff0000;
+* {
+  font-family: sans-serif;
+  font-weight: bold;
+  /* border-style: solid;
+  border-color: #ff00ff; */
+}
+#base {
   display: flex;
   flex-direction: column;
-  height: 90vh;
+  height: 100vh;
 }
 #controls {
-  border-style: solid;
-  background-color: #ccaaaa;
   flex: 1;
   display: flex;
   align-items: center;
+  background: #ffaaaa;
 }
 #play {
-  flex: 1;
+  flex: 2;
+  border-radius: 1em;
   height: 100%;
+  font-size: 1em;
+  background: #b90078;
 }
 #volume {
-  flex: 4;
-  height: 100;
+  flex: 5;
+  -webkit-appearance: none;
+  height: 50%;
+  background: #ddddff;
+}
+#volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 25px;
+  height: 75px;
+  border-radius: 1em;
+  background: #b90078;
 }
 #currentsong {
-  border-style: solid;
-  background-color: #aaccaa;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #aaffaa;
 }
 #playlist {
-  border-style: solid;
-  background-color: #aaaacc;
   flex: 5;
+  background: #aaaaff;
 }

@@ -68,13 +68,16 @@ def mpd_set_vol(level):
     except:
         pass
 
-def mpd_get_current_song(item):
+def mpd_get_current_song(item=None):
     try:
         mpc.connect("localhost", MPD_PORT)
         info =  mpc.currentsong()
         mpc.close()
         mpc.disconnect()
-        return info.get(item, "unknown")
+        if item:
+            return info.get(item, "unknown")
+        else:
+            return info
     except:
         pass
 
@@ -92,17 +95,18 @@ class XHRHandler(tornado.web.RequestHandler):
             params = self.request.arguments
             for command, value in params.items():
                 command = command.strip().upper()
+                value = value[0] if len(value[0]) else None
                 DBG(" command={}, value={}".format(command, value))
                 if command=="PLAY":
                     DBG("PLAY")
                     mpd_toggle()
                 if command=="VOLUME":
-                    level = int(value[0])
+                    level = int(value)
                     DBG("VOLUME {}".format(level))
                     mpd_set_vol(level)
                 if command=="SONG":
                     DBG("SONG")
-                    self.write(mpd_get_current_song('title'))
+                    self.write(mpd_get_current_song())
         except:
             DBG("NO ARG")
 

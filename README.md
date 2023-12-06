@@ -22,4 +22,4 @@ playlist, etc. has already been done.
 
 To keep the requirements minimal, all CSS and JavaScript is written
 from scratch. So intentionally **not** using any of the many available
-CSS (bootstrap, etc.) frameworks or JavaScript (jquery, etc.) library.
+CSS (bootstrap, etc.) frameworks or JavaScript (jquery, etc.) libraries.

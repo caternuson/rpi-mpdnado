@@ -5,13 +5,13 @@ window.onload = () => {
 }
 
 /**-----------------------------------------------------------------------
- * Perform an XMLHTTPRequest (XHR). Command and value (optiona) are passed
+ * Perform an XMLHTTPRequest (XHR). Command and value (optional) are passed
  * as URL parameters, `{xhr_url}?command=value`. If a callback function is
- * provided, it is called (async) and passed raw XHR response.
+ * provided, it is called (async) and passed the raw XHR response.
  *
  * @param {string} command - The command to send.
- * @param {string} value - Any parameters
- * @param {function} callback -
+ * @param {string} value - The value to send. (opt)
+ * @param {function} callback - Function called to handle response. (opt)
 -----------------------------------------------------------------------*/
 function xhr(command, value=null, callback=null) {
   var xmlreq = new XMLHttpRequest();
@@ -24,11 +24,12 @@ function xhr(command, value=null, callback=null) {
     }
   }
 
+  URL = "http://" + location.host + "/xhr?" + command;
   if (value) {
-    xmlreq.open("GET", "http://" + location.host + "/xhr?" + command + "=" + value);
-  } else {
-    xmlreq.open("GET", "http://" + location.host + "/xhr?" + command);
+    URL += "=" + value
   }
+  console.log("XHR: " + URL);
+  xmlreq.open("GET", URL);
   xmlreq.send();
 }
 
@@ -36,7 +37,7 @@ function xhr(command, value=null, callback=null) {
  * Query current song title via XHR.
  -----------------------------------------------------------------------*/
 function queryCurrSong() {
-  xhr("song", "current", updateCurrSong)
+  xhr("song", null, updateCurrSong)
 }
 
 /**-----------------------------------------------------------------------
@@ -44,9 +45,11 @@ function queryCurrSong() {
  *
  * @param {string} title - The title of the song.
  -----------------------------------------------------------------------*/
-function updateCurrSong(title) {
-  console.log(title)
-  document.getElementById("currentsong").textContent = title
+function updateCurrSong(json) {
+  console.log(json)
+  songInfo = JSON.parse(json);
+  document.getElementById("song_name").textContent = songInfo.name;
+  document.getElementById("song_title").textContent = songInfo.title;
 }
 
 /**-----------------------------------------------------------------------
