@@ -1,5 +1,5 @@
 #----------------------------------------------------------
-# Simple mpd web intercace.
+# Simple mpd web interface.
 #
 # carter nelson
 # 2026/10/06
