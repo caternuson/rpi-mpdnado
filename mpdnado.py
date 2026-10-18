@@ -1,7 +1,15 @@
+#----------------------------------------------------------
+# Simple mpd web intercace.
+#
+# carter nelson
+# 2026/10/06
+#----------------------------------------------------------
+
 import os
+import json
 import mpd
-import tornado.httpserver
-import tornado.web
+import asyncio
+import tornado
 
 WEB_PORT = 8081
 MPD_PORT = 6600
@@ -84,51 +92,37 @@ def mpd_get_current_song(item=None):
 #--------------------------------------------------------------------
 # T O R N A D O
 #--------------------------------------------------------------------
-class RootHandler(tornado.web.RequestHandler):
+class MainHandler(tornado.web.RequestHandler):
+
     def get(self):
         self.render("mpdnado.html")
 
-class XHRHandler(tornado.web.RequestHandler):
-    def get(self, *args, **kwargs):
-        DBG("XHR: ", end='')
-        try:
-            params = self.request.arguments
-            for command, value in params.items():
-                command = command.strip().upper()
-                value = value[0] if len(value[0]) else None
-                DBG(" command={}, value={}".format(command, value))
-                if command=="PLAY":
-                    DBG("PLAY")
-                    mpd_toggle()
-                if command=="VOLUME":
-                    level = int(value)
-                    DBG("VOLUME {}".format(level))
-                    mpd_set_vol(level)
-                if command=="SONG":
-                    DBG("SONG")
-                    self.write(mpd_get_current_song())
-        except:
-            DBG("NO ARG")
+    def post(self):
+        request_info = json.loads(self.request.body)
+        CMD = request_info.get("CMD").strip().upper()
+        PAR = request_info.get("PAR")
+        if "TOG"==CMD:
+            mpd_toggle()
+        elif "VOL"==CMD:
+            mpd_set_vol(PAR.get("level"))
+        self.write(json.dumps(mpd_status()))
 
-class MainServerApp(tornado.web.Application):
-    """Main Server application."""
-    def __init__(self):
-        handlers = [
-            (r"/", RootHandler),
-            (r"/xhr", XHRHandler)
-        ]
-
-        settings = {
-            "static_path": os.path.join(os.path.dirname(__file__), "static"),
-            "template_path": os.path.join(os.path.dirname(__file__), "templates"),
-        }
-
-        tornado.web.Application.__init__(self, handlers, **settings)
+async def main():
+    handlers = [
+        (r"/", MainHandler),
+    ]
+    settings = {
+        "static_path": os.path.join(os.path.dirname(__file__), "static"),
+        "template_path": os.path.join(os.path.dirname(__file__), "static"),
+    }
+    app = tornado.web.Application(handlers, **settings)
+    app.listen(WEB_PORT)
+    print(f"Server started on {WEB_PORT}...")
+    shutdown_event = asyncio.Event()
+    await shutdown_event.wait()
 
 #--------------------------------------------------------------------
 # M A I N
 #--------------------------------------------------------------------
-if __name__ == '__main__':
-    tornado.httpserver.HTTPServer(MainServerApp()).listen(WEB_PORT)
-    print("Server starting on", WEB_PORT)
-    tornado.ioloop.IOLoop.instance().start()
+if __name__ == "__main__":
+    asyncio.run(main())
