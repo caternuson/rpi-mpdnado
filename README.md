@@ -3,7 +3,8 @@
 A simple web interface for mpd using Tornado, providing:
 
   * Start/stop playback control
-  * Volume control
+  * Volume control (TODO)
+  * Playlist selection
   * Status info dump
 
 # Requirements
@@ -14,7 +15,7 @@ A simple web interface for mpd using Tornado, providing:
   * A Python venv with:
     * [Tornado](https://www.musicpd.org/)
     * [python-mpd2](https://github.com/Mic92/python-mpd2)
-  * [Bootstrap](https://getbootstrap.com/) and [jQuery](https://jquery.com/) are included locally
+  * [Bulma](https://bulma.io/) and [jQuery](https://jquery.com/) are included locally
 
 # Systemd
 Here's a basic systemd unit file that can be placed in `/etc/systemd/system/mpdnado.service`:
