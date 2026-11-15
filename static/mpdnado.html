@@ -2,37 +2,73 @@
 <html>
 
 <head>
-<title>MPD Control</title>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link href={{ static_url("css/bootstrap.min.css") }} rel="stylesheet"/>
-<script src={{ static_url("js/jquery.min.js") }}></script>
+  <title>MPD Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link href={{ static_url("css/bulma.min.css") }} rel="stylesheet"/>
+  <script src={{ static_url("js/jquery.min.js") }}></script>
 </head>
 
 <body>
-<div class="text-center">
+<section class="section">
 <div class="container">
-<button type="button" class="btn-lg btn-solid theme-info" id="btn_play">TOGGLE</button>
+<div class="columns is-centered">
+
+<div class="column is-full">
+  <button id="btn_toggle" class="button is-info is-fullwidth">TOGGLE</button>
 </div>
-<div class="container">
-  <div class="form-range">
-  <input type="range" class="form-range-input theme-accent" id="volume">
+
+<div class="column is-full">
+  <div class="select is-fullwidth is-primary">
+  <select id="playlist">
+    <option>Select dropdown</option>
+    <option>With options</option>
+  </select>
   </div>
 </div>
-<div class="container">
-  <div class="alert theme-secondary" role="alert">
-  <p id="status">NO INFO</p>
-  </div>
+
+<div class="column is-full">
+  <textarea id="status" class="textarea is-fullwidth has-text-info has-background-grey-darker" rows=10>
+  </textarea>
+</div>
+
 </div>
 </div>
+</section>
 
 <script>
-$('#btn_play').on('click', async function() {
-  sendCommand("TOG");
+$('#btn_toggle').on('click', async function() {
+  await sendCommand("TOG");
+  await updateStatus();
 });
 
-$('#volume').on('change', function() {
-  sendCommand("VOL", {"level":$(this).val()})
+$('#playlist').change(async function() {
+  await sendCommand("PLY", this.value);
+  await updateStatus();
 });
+
+$(document).ready(async function () {
+  await updatePlaylist();
+  await updateStatus();
+});
+
+async function updateStatus() {
+  stat = await sendCommand("STA");
+  $('#status').text(JSON.stringify(stat, null, 2))
+}
+
+async function updatePlaylist() {
+  playlist = await sendCommand("LIS");
+  console.log(playlist);
+  cursong = await sendCommand("CUR");
+  console.log(cursong);
+  console.log(cursong.pos);
+  $('#playlist').empty();
+  $.each(playlist, function( index, value) {
+    console.log(index, value);
+    $('#playlist').append($("<option></option>").attr("value", index).text(value))
+  });
+  $('#playlist').val(cursong.pos)
+}
 
 async function sendCommand(command, params=null) {
   resp = await $.ajax({
@@ -44,8 +80,12 @@ async function sendCommand(command, params=null) {
       PAR: params
     })
   })
-  console.log(JSON.stringify(resp));
-  $('#status').text(JSON.stringify(resp, null, 2));
+  //console.log(resp)
+  //json = JSON.stringify(resp, null, 2)
+  //json = JSON.parse(resp)
+  //console.log(json)
+  //return json
+  return resp
 }
 </script>
 </body>

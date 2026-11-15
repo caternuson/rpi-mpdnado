@@ -89,6 +89,18 @@ def mpd_get_current_song(item=None):
     except:
         pass
 
+def mpd_get_playlist():
+    try:
+        mpc.connect("localhost", MPD_PORT)
+        # a list of dicts per play list item
+        playlist = mpc.playlistid()
+        mpc.close()
+        mpc.disconnect()
+        # only return "name" info, truncated
+        return [item.get('name', 'unknown')[:30] for item in playlist]
+    except:
+        pass
+
 #--------------------------------------------------------------------
 # T O R N A D O
 #--------------------------------------------------------------------
@@ -100,12 +112,24 @@ class MainHandler(tornado.web.RequestHandler):
     def post(self):
         request_info = json.loads(self.request.body)
         CMD = request_info.get("CMD").strip().upper()
-        PAR = request_info.get("PAR")
-        if "TOG"==CMD:
+        PAR = request_info.get("PAR", None)
+        if "STA"==CMD:
+            self.write(json.dumps(mpd_status()))
+        elif "TOG"==CMD:
             mpd_toggle()
+            self.write(json.dumps(mpd_status()))
         elif "VOL"==CMD:
             mpd_set_vol(PAR.get("level"))
-        self.write(json.dumps(mpd_status()))
+            self.write(json.dumps(mpd_status()))
+        elif "LIS"==CMD:
+            self.write(json.dumps(mpd_get_playlist()))
+        elif "PLY"==CMD:
+            mpd_play(int(PAR))
+            self.write(json.dumps(mpd_status()))
+        elif "CUR"==CMD:
+            self.write(json.dumps(mpd_get_current_song()))
+        else:
+            print("Unknown request:", CMD, PAR)
 
 async def main():
     handlers = [
